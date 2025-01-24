@@ -1,5 +1,7 @@
 import http from "node:http";
-import { json } from "node:stream/consumers";
+import { json } from "./middlewares/json.js";
+import { Database } from "./database.js";
+import {randomUUID} from 'node:crypto';
 
 // - HTTP
 //  - Método HTTP
@@ -26,41 +28,32 @@ import { json } from "node:stream/consumers";
 
 // HTTP status code
 
-const users = [];
+const database = new Database();
 
 const server = http.createServer(async (req, res) => {
   const { method, url, statusCode } = req;
 
   console.log(method, url);
 
-  const buffers = [];
-
-  for await (const chunk of req) {
-    buffers.push(chunk);
-  }
-
-  // {"name": "Daniel", "Email": "daniel@email.com"} teria que esperar totalmente pra poder consumir.
-
-  try {
-    req.body = JSON.parse(Buffer.concat(buffers).toString());
-  } catch (error) {
-    req.body = null;
-  }
+  await json(req, res);
 
   if (method === "GET" && url === "/users") {
-    return res
-      .setHeader("Content-type", "application/json")
-      .end(JSON.stringify(users));
+
+    const users = database.select('users');
+
+    return res.end(JSON.stringify(users));
   }
 
   if (method === "POST" && url === "/users") {
     const { name, email } = req.body;
 
-    users.push({
-      id: Math.random(),
+    const user = {
+      id: randomUUID(),
       name,
       email,
-    });
+    };
+
+    database.insert("users", user)
 
     return res.writeHead(201).end();
   }
