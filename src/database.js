@@ -1,6 +1,5 @@
 // {"users": [...]}
 import fs from "node:fs/promises";
-import { json } from "node:stream/consumers";
 
 const databasePath = new URL("db.json", import.meta.url);
 
