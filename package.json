@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: algo\" && exit 1",
-    "dev": "node --watch training/server.js"
+    "dev": "node --watch src/server.js"
   },
   "keywords": [],
   "author": "",

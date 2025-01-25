@@ -48,4 +48,18 @@ export class Database {
         throw new Error(`Tabela "${table}" não existe ou não é um array.`);
       }
   }
+
+
+  update(id,table,data){
+    if(Array.isArray(this.#database[table])){
+    const updateDatabase = this.#database[table].map(user => (user.id === id ? {...user,...data} : {...user}));
+
+    this.#database[table] = updateDatabase;
+
+    this.#persist();
+    } else {
+      throw new Error("Usuário ou Tabela não existe")
+    }
+
+  }
 }

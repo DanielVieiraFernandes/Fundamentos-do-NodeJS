@@ -1,7 +1,8 @@
 import http from "node:http";
 import { json } from "./middlewares/json.js";
 import { Database } from "./database.js";
-import {randomUUID} from 'node:crypto';
+import { randomUUID } from "node:crypto";
+import { routes } from "./routes.js";
 
 // - HTTP
 //  - Método HTTP
@@ -28,7 +29,24 @@ import {randomUUID} from 'node:crypto';
 
 // HTTP status code
 
-const database = new Database();
+
+// três formas do front enviar parâmetros pro backend
+
+// Query Parameters: URL Stateful ==> Filtros, paginação, não-obrigatórios
+// Route Parameters: Identificação de recurso
+// Request Body: Envio de informações de um formulário por exemplo.
+
+// http://localhost:3333/users?userId=1&name=Diego - Query
+
+// GET http://localhost:3333/users/1
+// DELETE http://localhost:3333/users/1
+
+
+// POST http://localhost:3333/users
+
+// Edição e remoção do usuário
+
+
 
 const server = http.createServer(async (req, res) => {
   const { method, url, statusCode } = req;
@@ -37,28 +55,22 @@ const server = http.createServer(async (req, res) => {
 
   await json(req, res);
 
-  if (method === "GET" && url === "/users") {
+  const route = routes.find((route) => {
+    return route.method === method && route.path.test(url);
+  });
 
-    const users = database.select('users');
+  if (route) {
 
-    return res.end(JSON.stringify(users));
-  }
+    const routeParams = req.url.match(route.path);
 
-  if (method === "POST" && url === "/users") {
-    const { name, email } = req.body;
+    console.log(routeParams);
 
-    const user = {
-      id: randomUUID(),
-      name,
-      email,
-    };
+    req.params = {...routeParams.groups}
 
-    database.insert("users", user)
-
-    return res.writeHead(201).end();
+    return route.handler(req,res);
   }
 
   return res.writeHead(404).end("Not Found");
 });
 
-server.listen(3335);
+server.listen(3333);

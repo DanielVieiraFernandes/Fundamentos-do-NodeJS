@@ -46,6 +46,23 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  if(method === "PUT" && url.startsWith("/users")){
+
+    const id = url.split("/")[2];
+    const data = req.body;
+
+    if(!id){
+      return res.writeHead(400).end("Id do usuário não fornecido")
+    }
+
+    try {
+      database.update(id,"users", data)
+      return res.writeHead(200).end('Usuário alterado com sucesso')
+    } catch (error) {
+      return res.setHeader(500).end(error)
+    }
+  }
+
   return res.writeHead(404).end("Not Found");
 });
 
