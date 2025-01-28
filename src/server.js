@@ -3,6 +3,7 @@ import { json } from "./middlewares/json.js";
 import { Database } from "./database.js";
 import { randomUUID } from "node:crypto";
 import { routes } from "./routes.js";
+import { extractQueryParams } from "./utils/extract-query-params.js";
 
 // - HTTP
 //  - Método HTTP
@@ -65,7 +66,10 @@ const server = http.createServer(async (req, res) => {
 
     console.log(routeParams);
 
-    req.params = {...routeParams.groups}
+    const {query, ...params} = routeParams.groups
+
+    req.params = params;
+    req.query = query ? extractQueryParams(query) : {};
 
     return route.handler(req,res);
   }
